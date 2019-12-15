@@ -22,6 +22,7 @@ class _progress_page extends State<progress_page> {
   String employee = "เกว";
 
   final format = DateFormat("yyyy-MM-dd HH:mm");
+  final textAreaFocus = FocusNode();
 
   @override
   Widget build(BuildContext context) {
@@ -223,7 +224,9 @@ class _progress_page extends State<progress_page> {
                             ),
                           ),
                           GestureDetector(
-                            onTap: () {},
+                            onTap: () {
+                              textAreaFocus.requestFocus();
+                            },
                             child: Container(
                               alignment: Alignment.topLeft,
                               padding: EdgeInsets.all(10),
@@ -234,6 +237,7 @@ class _progress_page extends State<progress_page> {
                                 border: Border.all(color: Colors.black),
                               ),
                               child: TextField(
+                                focusNode: textAreaFocus,
                                 maxLines: null,
                                 decoration:
                                     InputDecoration.collapsed(hintText: ""),

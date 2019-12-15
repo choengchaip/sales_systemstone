@@ -24,7 +24,7 @@ class _info_page extends State<info_page> {
   String country;
   String province;
   String district;
-
+  
   @override
   Widget build(BuildContext context) {
     double _paddingTop = MediaQuery.of(context).padding.top;
