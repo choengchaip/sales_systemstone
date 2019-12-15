@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:sale_systemstone/Pages/ProspectPage.dart';
+import 'ProspectPage.dart';
 import 'ProgressPage.dart';
+import 'InfomationPage.dart';
 
 class company_page extends StatefulWidget {
   _company_page createState() => _company_page();
@@ -119,12 +120,16 @@ class _company_page extends State<company_page> {
                                         children: <Widget>[
                                           Expanded(
                                             child: GestureDetector(
-                                              onTap: (){
-                                                Navigator.push(context, MaterialPageRoute(builder: (context){
-                                                  return prospect_page(companyData[index]['name']);
+                                              onTap: () {
+                                                Navigator.push(context,
+                                                    MaterialPageRoute(
+                                                        builder: (context) {
+                                                  return prospect_page(
+                                                      companyData[index]
+                                                          ['name']);
                                                 }));
                                               },
-                                                                                          child: Container(
+                                              child: Container(
                                                 alignment: Alignment.center,
                                                 padding: EdgeInsets.only(
                                                     top: 7, bottom: 7),
@@ -137,22 +142,33 @@ class _company_page extends State<company_page> {
                                             ),
                                           ),
                                           Expanded(
-                                            child: Container(
-                                              alignment: Alignment.center,
-                                              padding: EdgeInsets.only(
-                                                  top: 7, bottom: 7),
-                                              child: Image.asset(
-                                                "assets/images/info.png",
-                                                filterQuality:
-                                                    FilterQuality.high,
+                                            child: GestureDetector(
+                                              onTap: () {
+                                                Navigator.push(context, MaterialPageRoute(builder: (context){
+                                                  return info_page(companyData[index]['name']);
+                                                }));
+                                              },
+                                              child: Container(
+                                                alignment: Alignment.center,
+                                                padding: EdgeInsets.only(
+                                                    top: 7, bottom: 7),
+                                                child: Image.asset(
+                                                  "assets/images/info.png",
+                                                  filterQuality:
+                                                      FilterQuality.high,
+                                                ),
                                               ),
                                             ),
                                           ),
                                           Expanded(
                                             child: GestureDetector(
                                               onTap: () {
-                                                Navigator.push(context, MaterialPageRoute(builder: (context){
-                                                  return progress_page(companyData[index]['name']);
+                                                Navigator.push(context,
+                                                    MaterialPageRoute(
+                                                        builder: (context) {
+                                                  return progress_page(
+                                                      companyData[index]
+                                                          ['name']);
                                                 }));
                                               },
                                               child: Container(
