@@ -84,10 +84,10 @@ class _status_page extends State<status_page> {
                     if (index == 0) {
                       return Container(
                         decoration: BoxDecoration(
-                          color: Color(0xffCDE3CC),
-                          border: Border(
-                              bottom: BorderSide(
-                                  color: Color(0xffcbcbcb), width: 1))),
+                            color: Color(0xffCDE3CC),
+                            border: Border(
+                                bottom: BorderSide(
+                                    color: Color(0xffcbcbcb), width: 1))),
                         padding: EdgeInsets.only(left: 10),
                         alignment: Alignment.centerLeft,
                         height: 47,
@@ -99,10 +99,10 @@ class _status_page extends State<status_page> {
                     } else if (index == 5) {
                       return Container(
                         decoration: BoxDecoration(
-                          color: Color(0xffE1E3CC),
-                          border: Border(
-                              bottom: BorderSide(
-                                  color: Color(0xffcbcbcb), width: 1))),
+                            color: Color(0xffE1E3CC),
+                            border: Border(
+                                bottom: BorderSide(
+                                    color: Color(0xffcbcbcb), width: 1))),
                         padding: EdgeInsets.only(left: 10),
                         alignment: Alignment.centerLeft,
                         height: 47,
@@ -114,10 +114,10 @@ class _status_page extends State<status_page> {
                     } else if (index == 10) {
                       return Container(
                         decoration: BoxDecoration(
-                          color: Color(0xffE3CCCC),
-                          border: Border(
-                              bottom: BorderSide(
-                                  color: Color(0xffcbcbcb), width: 1))),
+                            color: Color(0xffE3CCCC),
+                            border: Border(
+                                bottom: BorderSide(
+                                    color: Color(0xffcbcbcb), width: 1))),
                         padding: EdgeInsets.only(left: 10),
                         alignment: Alignment.centerLeft,
                         height: 47,
@@ -127,23 +127,24 @@ class _status_page extends State<status_page> {
                         ),
                       );
                     }
-                    if(index > 10){
-                      realIndex -=11;
+                    if (index > 10) {
+                      realIndex -= 11;
                       realKey = 'bad';
-                    }else if(index > 5){
+                    } else if (index > 5) {
                       realIndex -= 6;
                       realKey = 'normal';
-                    }else if(index >0){
+                    } else if (index > 0) {
                       realIndex -= 1;
                       realKey = 'good';
                     }
                     realIndex += index;
 
                     return GestureDetector(
-                      onTap: (){
-                        Navigator.of(context).pop(statusData[realKey][realIndex]);
+                      onTap: () {
+                        Navigator.of(context)
+                            .pop(statusData[realKey][realIndex]);
                       },
-                                          child: Container(
+                      child: Container(
                         decoration: BoxDecoration(
                             border: Border(
                                 bottom: BorderSide(
@@ -151,7 +152,8 @@ class _status_page extends State<status_page> {
                         alignment: Alignment.centerLeft,
                         padding: EdgeInsets.only(left: 25),
                         height: 47,
-                        child: Text(statusData[realKey][realIndex], style: headerDetial),
+                        child: Text(statusData[realKey][realIndex],
+                            style: headerDetial),
                       ),
                     );
                   },

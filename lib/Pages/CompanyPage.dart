@@ -4,6 +4,7 @@ import 'ProgressPage.dart';
 import 'InfomationPage.dart';
 
 class company_page extends StatefulWidget {
+  @override
   _company_page createState() => _company_page();
 }
 
@@ -37,6 +38,7 @@ List<Map<String, String>> companyData = [
 class _company_page extends State<company_page> {
   TextStyle topStyle = TextStyle(color: Colors.white, fontSize: 20);
   TextStyle companyStyle = TextStyle(fontSize: 18, fontWeight: FontWeight.bold);
+
   @override
   Widget build(BuildContext context) {
     double _paddingTop = MediaQuery.of(context).padding.top;
@@ -98,7 +100,7 @@ class _company_page extends State<company_page> {
                             return Container(
                               height: 100,
                               margin: EdgeInsets.only(
-                                  bottom: 10, left: 15, right: 15),
+                              bottom: 10, left: 15, right: 15),
                               child: Card(
                                 child: Column(
                                   children: <Widget>[
@@ -135,8 +137,6 @@ class _company_page extends State<company_page> {
                                                     top: 7, bottom: 7),
                                                 child: Image.asset(
                                                   "assets/images/money.png",
-                                                  filterQuality:
-                                                      FilterQuality.high,
                                                 ),
                                               ),
                                             ),
@@ -154,8 +154,6 @@ class _company_page extends State<company_page> {
                                                     top: 7, bottom: 7),
                                                 child: Image.asset(
                                                   "assets/images/info.png",
-                                                  filterQuality:
-                                                      FilterQuality.high,
                                                 ),
                                               ),
                                             ),
@@ -177,8 +175,6 @@ class _company_page extends State<company_page> {
                                                     top: 7, bottom: 7),
                                                 child: Image.asset(
                                                   "assets/images/comment.png",
-                                                  filterQuality:
-                                                      FilterQuality.high,
                                                 ),
                                               ),
                                             ),
