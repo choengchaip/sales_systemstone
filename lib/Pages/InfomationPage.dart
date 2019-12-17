@@ -4,14 +4,14 @@ import 'Components/ProvincePage.dart';
 import 'Components/DistrictPage.dart';
 
 class info_page extends StatefulWidget {
-  String companyName;
+  int companyName;
   info_page(this.companyName);
   @override
   _info_page createState() => _info_page(this.companyName);
 }
 
 class _info_page extends State<info_page> {
-  String companyName;
+  int companyName;
   _info_page(this.companyName);
 
   TextStyle topStyle = TextStyle(color: Colors.white, fontSize: 20);
@@ -85,7 +85,7 @@ class _info_page extends State<info_page> {
                           Container(
                             padding: EdgeInsets.only(left: 10),
                             child: Text(
-                              this.companyName,
+                              this.companyName.toString(),
                               style: companyStyle,
                             ),
                           ),

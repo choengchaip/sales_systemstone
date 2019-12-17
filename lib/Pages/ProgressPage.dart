@@ -5,14 +5,14 @@ import 'package:intl/intl.dart';
 import 'Components/StatusPage.dart';
 
 class progress_page extends StatefulWidget {
-  String companyName;
+  int companyName;
   progress_page(this.companyName);
   @override
   _progress_page createState() => _progress_page(this.companyName);
 }
 
 class _progress_page extends State<progress_page> {
-  String companyName;
+  int companyName;
   _progress_page(this.companyName);
   TextStyle topStyle = TextStyle(color: Colors.white, fontSize: 20);
   TextStyle companyStyle = TextStyle(fontSize: 18, fontWeight: FontWeight.bold);
@@ -84,7 +84,7 @@ class _progress_page extends State<progress_page> {
                           Container(
                             padding: EdgeInsets.only(left: 10),
                             child: Text(
-                              this.companyName,
+                              this.companyName.toString(),
                               style: companyStyle,
                             ),
                           ),

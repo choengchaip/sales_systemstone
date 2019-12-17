@@ -1,43 +1,44 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'ProspectPage.dart';
 import 'ProgressPage.dart';
 import 'InfomationPage.dart';
+import 'package:http/http.dart' as http;
 
 class company_page extends StatefulWidget {
+  String userId;
+  company_page(this.userId);
   @override
-  _company_page createState() => _company_page();
+  _company_page createState() => _company_page(this.userId);
 }
 
-List<Map<String, String>> companyData = [
-  {
-    "name": "Oil A",
-    "Dis": "TKK",
-    "Event Code": "",
-    "CurrentStatus": "3",
-    "Last Note": "ลูกค้ารอเจ้านายกลับ",
-    "Updated By": "เกว"
-  },
-  {
-    "name": "กระดาษสิงห์",
-    "Dis": "",
-    "Event Code": "TKK",
-    "CurrentStatus": "",
-    "Last Note": "",
-    "Updated By": ""
-  },
-  {
-    "name": "กล่องกระดาษ",
-    "Dis": "",
-    "Event Code": "Summit",
-    "CurrentStatus": "",
-    "Last Note": "",
-    "Updated By": ""
-  },
-];
-
 class _company_page extends State<company_page> {
+  String userId;
+  _company_page(this.userId);
   TextStyle topStyle = TextStyle(color: Colors.white, fontSize: 20);
   TextStyle companyStyle = TextStyle(fontSize: 18, fontWeight: FontWeight.bold);
+  TextEditingController _companyName = TextEditingController();
+  List<dynamic> companyData;
+
+  String hostIP = "localhost";
+  String port = '8750';
+
+  Future searchCompanyRequest() async {
+    List<dynamic> tmp_data = List<dynamic>();
+    var res = await http.get('http://${hostIP}:${port}/getCompanyList?userId=${userId}&companyName=${_companyName.text}');
+    tmp_data = jsonDecode(res.body);
+    setState(() {
+      companyData = tmp_data;
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    searchCompanyRequest();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,6 +77,10 @@ class _company_page extends State<company_page> {
                             child: Container(
                               padding: EdgeInsets.only(left: 10),
                               child: TextField(
+                                controller: _companyName,
+                                onChanged: (String value){
+                                  searchCompanyRequest();
+                                },
                                 decoration: InputDecoration.collapsed(
                                     hintText: "ใส่ชื่อบริษัท"),
                               ),
@@ -95,12 +100,13 @@ class _company_page extends State<company_page> {
                       child: Container(
                         child: ListView.builder(
                           padding: EdgeInsets.zero,
-                          itemCount: companyData.length,
+                          itemCount:
+                              companyData == null ? 0 : companyData.length,
                           itemBuilder: (BuildContext context, int index) {
                             return Container(
                               height: 100,
                               margin: EdgeInsets.only(
-                              bottom: 10, left: 15, right: 15),
+                                  bottom: 10, left: 15, right: 15),
                               child: Card(
                                 child: Column(
                                   children: <Widget>[
@@ -110,7 +116,7 @@ class _company_page extends State<company_page> {
                                             EdgeInsets.only(left: 15, top: 15),
                                         alignment: Alignment.topLeft,
                                         child: Text(
-                                          companyData[index]['name'],
+                                          companyData[index]['COMPANY_NAME'],
                                           style: companyStyle,
                                         ),
                                       ),
@@ -126,9 +132,7 @@ class _company_page extends State<company_page> {
                                                 Navigator.push(context,
                                                     MaterialPageRoute(
                                                         builder: (context) {
-                                                  return prospect_page(
-                                                      companyData[index]
-                                                          ['name']);
+                                                  return prospect_page(companyData[index]['COMPANY_ID'].toString(),userId);
                                                 }));
                                               },
                                               child: Container(
@@ -144,8 +148,12 @@ class _company_page extends State<company_page> {
                                           Expanded(
                                             child: GestureDetector(
                                               onTap: () {
-                                                Navigator.push(context, MaterialPageRoute(builder: (context){
-                                                  return info_page(companyData[index]['name']);
+                                                Navigator.push(context,
+                                                    MaterialPageRoute(
+                                                        builder: (context) {
+                                                  return info_page(
+                                                      companyData[index]
+                                                          ['COMPANY_ID']);
                                                 }));
                                               },
                                               child: Container(
@@ -166,7 +174,7 @@ class _company_page extends State<company_page> {
                                                         builder: (context) {
                                                   return progress_page(
                                                       companyData[index]
-                                                          ['name']);
+                                                          ['COMPANY_ID']);
                                                 }));
                                               },
                                               child: Container(

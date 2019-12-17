@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class prospect_page extends StatefulWidget {
-  String companyName;
-  prospect_page(this.companyName);
+  String companyId;
+  String userId;
+  prospect_page(this.companyId, this.userId);
   @override
-  _prospect_page createState() => _prospect_page(this.companyName);
+  _prospect_page createState() => _prospect_page(this.companyId, this.userId);
 }
 
 class _prospect_page extends State<prospect_page> {
-  String companyName;
-  _prospect_page(this.companyName);
+  String companyId;
+  String userId;
+  _prospect_page(this.companyId, this.userId);
+
+  String hostIP = "localhost";
+  String port = '8750';
 
   TextStyle topStyle = TextStyle(color: Colors.white, fontSize: 20);
   TextStyle companyStyle = TextStyle(fontSize: 18, fontWeight: FontWeight.bold);
@@ -37,6 +43,56 @@ class _prospect_page extends State<prospect_page> {
       realMoney += moneyValue[i];
     }
     return realMoney;
+  }
+
+  Future<bool> updateCompanyProspect() async {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return Container(
+            alignment: Alignment.center,
+            child: CircularProgressIndicator(),
+          );
+        });
+
+    String money = "";
+    for (int i = 0; i < _moneyText.text.length; i++) {
+      if (_moneyText.text[i] == ',') {
+        continue;
+      }
+      money += _moneyText.text[i];
+    }
+    var res = await http
+        .post('http://${hostIP}:${port}/updateCompanyProspect', body: {
+      'userId': this.userId,
+      'companyId': this.companyId,
+      'dealPercent': money,
+      'expectedRev': _prosText.text
+    });
+    print(res.body);
+    if (res.body == '1') {
+      Navigator.of(context).pop();
+      var a = await showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              content: Text("บันทึกสำเร็จแล้ว"),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text("ตกลง"),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          });
+      Navigator.of(context).pop();
+      return true;
+    } else {
+      Navigator.of(context).pop();
+      return false;
+    }
   }
 
   @override
@@ -105,7 +161,7 @@ class _prospect_page extends State<prospect_page> {
                           Container(
                             padding: EdgeInsets.only(left: 10),
                             child: Text(
-                              this.companyName,
+                              this.companyId.toString(),
                               style: companyStyle,
                             ),
                           ),
@@ -207,7 +263,7 @@ class _prospect_page extends State<prospect_page> {
             ),
             GestureDetector(
               onTap: () {
-                Navigator.of(context).pop();
+                updateCompanyProspect();
               },
               child: Container(
                 alignment: Alignment.center,
