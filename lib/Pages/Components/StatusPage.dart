@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class status_page extends StatefulWidget {
   @override
@@ -10,24 +13,48 @@ class _status_page extends State<status_page> {
   TextStyle companyStyle = TextStyle(fontSize: 18, fontWeight: FontWeight.bold);
   TextStyle headerDetial = TextStyle(fontSize: 18);
 
-  var statusData = {
-    "good": [
-      "ให้เข้าไปนำเสนอเพิ่มเติม",
-      "กำลังนำเสนอราคา",
-      "รอ PO จากลูกค้า",
-      "เป็นลูกค้าอยู่แล้ว",
-    ],
-    "normal": [
-      "สนใจแต่กำลังศึกษา",
-      "ขอทดลองใช้ก่อน",
-      "User < 5",
-      "อื่นๆ",
-    ],
-    "bad": [
-      "ยังไม่สนใจ",
-      "ติดต่อไม่ได้",
-    ]
-  };
+  String hostIP = "10.0.2.2";
+  String port = "8750";
+
+  var statusData;
+
+  Future getStatusList()async{
+    var res = await http.get('http://${hostIP}:${port}/getStatusList');
+    var statusJson = jsonDecode(res.body);
+    var good = [];
+    var normal = [];
+    var bad = [];
+    var s = {};
+    for(int i=0;i<statusJson.length;i++){
+      var tmp = {};
+      if(i<4){
+        tmp['status_id'] = statusJson[i]['SALE_STATUS_ID'];
+        tmp['status_name'] = statusJson[i]['SALE_STATUS_NAME'];
+        good.add(tmp);
+      }else if(i<8){
+        tmp['status_id'] = statusJson[i]['SALE_STATUS_ID'];
+        tmp['status_name'] = statusJson[i]['SALE_STATUS_NAME'];
+        normal.add(tmp);
+      }else if(i>=8){
+        tmp['status_id'] = statusJson[i]['SALE_STATUS_ID'];
+        tmp['status_name'] = statusJson[i]['SALE_STATUS_NAME'];
+        bad.add(tmp);
+      }
+    }
+    s['good'] = good;
+    s['normal'] = normal;
+    s['bad'] = bad;
+    setState(() {
+      statusData = s;
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getStatusList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,10 +101,7 @@ class _status_page extends State<status_page> {
               child: Container(
                 child: ListView.builder(
                   padding: EdgeInsets.zero,
-                  itemCount: (statusData['good'].length +
-                          statusData['normal'].length +
-                          statusData['bad'].length) +
-                      3,
+                  itemCount: statusData == null ? 0 : (statusData['good'].length + statusData['normal'].length + statusData['bad'].length +3),
                   itemBuilder: (BuildContext context, int index) {
                     int realIndex = 0;
                     String realKey = "good";
@@ -152,7 +176,7 @@ class _status_page extends State<status_page> {
                         alignment: Alignment.centerLeft,
                         padding: EdgeInsets.only(left: 25),
                         height: 47,
-                        child: Text(statusData[realKey][realIndex],
+                        child: Text(statusData[realKey][realIndex]['status_name'],
                             style: headerDetial),
                       ),
                     );

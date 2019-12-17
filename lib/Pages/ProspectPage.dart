@@ -14,8 +14,9 @@ class _prospect_page extends State<prospect_page> {
   String userId;
   _prospect_page(this.companyId, this.userId);
 
-  String hostIP = "localhost";
+  String hostIP = "10.0.2.2";
   String port = '8750';
+  String companyName;
 
   TextStyle topStyle = TextStyle(color: Colors.white, fontSize: 20);
   TextStyle companyStyle = TextStyle(fontSize: 18, fontWeight: FontWeight.bold);
@@ -23,6 +24,13 @@ class _prospect_page extends State<prospect_page> {
 
   TextEditingController _moneyText = TextEditingController();
   TextEditingController _prosText = TextEditingController();
+
+  Future getCompanyName()async{
+    var res = await http.get('http://${hostIP}:${port}/getCompanyName?companyId=${companyId}');
+    setState(() {
+      companyName = res.body;
+    });
+  }
 
   String stringToMoney(String money) {
     //1000000000
@@ -66,10 +74,9 @@ class _prospect_page extends State<prospect_page> {
         .post('http://${hostIP}:${port}/updateCompanyProspect', body: {
       'userId': this.userId,
       'companyId': this.companyId,
-      'dealPercent': money,
-      'expectedRev': _prosText.text
+      'dealPercent': _prosText.text,
+      'expectedRev': money
     });
-    print(res.body);
     if (res.body == '1') {
       Navigator.of(context).pop();
       var a = await showDialog(
@@ -99,6 +106,7 @@ class _prospect_page extends State<prospect_page> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    getCompanyName();
   }
 
   @override
@@ -161,7 +169,7 @@ class _prospect_page extends State<prospect_page> {
                           Container(
                             padding: EdgeInsets.only(left: 10),
                             child: Text(
-                              this.companyId.toString(),
+                              companyName == null ? "กำลังโหลด" : companyName,
                               style: companyStyle,
                             ),
                           ),
@@ -194,12 +202,7 @@ class _prospect_page extends State<prospect_page> {
                                 Expanded(
                                   child: Container(
                                     child: TextField(
-                                      onChanged: (String money) {
-                                        setState(() {
-                                          _moneyText.text =
-                                              stringToMoney(money);
-                                        });
-                                      },
+                                      
                                       controller: _moneyText,
                                       keyboardType: TextInputType.number,
                                       decoration: InputDecoration.collapsed(

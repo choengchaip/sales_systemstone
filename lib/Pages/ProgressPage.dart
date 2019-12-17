@@ -1,28 +1,106 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:intl/intl.dart';
-
+import 'package:http/http.dart' as http;
 import 'Components/StatusPage.dart';
 
 class progress_page extends StatefulWidget {
-  int companyName;
-  progress_page(this.companyName);
+  String companyId;
+  String userId;
+  progress_page(this.companyId, this.userId);
   @override
-  _progress_page createState() => _progress_page(this.companyName);
+  _progress_page createState() => _progress_page(this.companyId, this.userId);
 }
 
 class _progress_page extends State<progress_page> {
-  int companyName;
-  _progress_page(this.companyName);
+  String companyId;
+  String userId;
+  _progress_page(this.companyId, this.userId);
   TextStyle topStyle = TextStyle(color: Colors.white, fontSize: 20);
   TextStyle companyStyle = TextStyle(fontSize: 18, fontWeight: FontWeight.bold);
   TextStyle headerDetial = TextStyle(fontSize: 18);
   String dateTime;
   String status;
-  String employee = "เกว";
+  String status_id;
+  String employee = "กำลังโหลด";
+  List<dynamic> employees = ["กำลังโหลด"];
+  String companyName;
+
+  String hostIP = "10.0.2.2";
+  String port = '8750';
+
+  TextEditingController _noteText = TextEditingController();
 
   final format = DateFormat("yyyy-MM-dd HH:mm");
   final textAreaFocus = FocusNode();
+
+  Future getCompanyName() async {
+    var res = await http
+        .get('http://${hostIP}:${port}/getCompanyName?companyId=${companyId}');
+    setState(() {
+      companyName = res.body;
+    });
+  }
+
+  Future getEmployeeName() async {
+    var res = await http.get('http://${hostIP}:${port}/getEmployeeName');
+    var tmp_employees = [];
+    var employeeJson = jsonDecode(res.body);
+    for (int i = 0; i < employeeJson.length; i++) {
+      tmp_employees.add(employeeJson[i]['SHORT_NAME']);
+    }
+    print(tmp_employees);
+    setState(() {
+      employee = tmp_employees[0];
+      employees = tmp_employees;
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getCompanyName();
+    getEmployeeName();
+  }
+
+  Future updateCompanyProgress() async {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return Container(
+            alignment: Alignment.center,
+            child: CircularProgressIndicator(),
+          );
+        });
+    var res = await http
+        .post('http://${hostIP}:${port}/updateCompanyProgress', body: {
+      'datetime': dateTime,
+      'status': status_id,
+      'note': _noteText.text,
+      'sale_name': employee,
+      'created_by': userId,
+      'companyName': companyName
+    });
+    Navigator.pop(context);
+    var tmp = await showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            content: Text("อัพเดทสำเร็จ"),
+            actions: <Widget>[
+              FlatButton(
+                  child: Text("ตกลง"),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  }),
+            ],
+          );
+        });
+    Navigator.of(context).pop();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +162,7 @@ class _progress_page extends State<progress_page> {
                           Container(
                             padding: EdgeInsets.only(left: 10),
                             child: Text(
-                              this.companyName.toString(),
+                              companyName == null ? "กำลังโหลด" : companyName,
                               style: companyStyle,
                             ),
                           ),
@@ -169,12 +247,16 @@ class _progress_page extends State<progress_page> {
                           ),
                           GestureDetector(
                             onTap: () async {
-                              String tmp_status = await Navigator.push(context,
+                              var tmp_status = await Navigator.push(context,
                                   MaterialPageRoute(builder: (context) {
                                 return status_page();
                               }));
                               setState(() {
-                                status = tmp_status;
+                                if (tmp_status != null) {
+                                  status = tmp_status['status_name'];
+                                  status_id =
+                                      tmp_status['status_id'].toString();
+                                }
                               });
                             },
                             child: Container(
@@ -237,6 +319,7 @@ class _progress_page extends State<progress_page> {
                                 border: Border.all(color: Colors.black),
                               ),
                               child: TextField(
+                                controller: _noteText,
                                 focusNode: textAreaFocus,
                                 maxLines: null,
                                 decoration:
@@ -289,12 +372,9 @@ class _progress_page extends State<progress_page> {
                                               employee = value;
                                             });
                                           },
-                                          items: <String>[
-                                            'เกว',
-                                            'สิงห์',
-                                            'พี่เอก'
-                                          ].map<DropdownMenuItem<String>>(
-                                              (String value) {
+                                          items: employees
+                                              .map<DropdownMenuItem<String>>(
+                                                  (dynamic value) {
                                             return DropdownMenuItem(
                                               value: value,
                                               child: Text(
@@ -318,7 +398,12 @@ class _progress_page extends State<progress_page> {
             ),
             GestureDetector(
               onTap: () {
-                Navigator.of(context).pop();
+                print(dateTime);
+                print(status_id);
+                print(_noteText.text);
+                print(employee);
+                print(userId);
+                updateCompanyProgress();
               },
               child: Container(
                 alignment: Alignment.center,

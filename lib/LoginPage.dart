@@ -9,7 +9,7 @@ class login_page extends StatefulWidget {
   _login_page createState() => _login_page();
 }
 
-String hostIP = "localhost";
+String hostIP = "10.0.2.2";
 String port = '8750';
 
 class _login_page extends State<login_page> {

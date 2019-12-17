@@ -27,9 +27,9 @@ server.post("/auth", async (req, res) => {
         if (err) {
             console.log(err);
         } else {
-            if(result.recordset.length > 0){
+            if (result.recordset.length > 0) {
                 res.json(result.recordset[0]['USER_ID']);
-            }else{
+            } else {
                 res.send('0');
             }
         }
@@ -41,14 +41,41 @@ server.get("/getCompanyList", (req, res) => {
     let companyName = req.query.companyName;
     var sqlCode = `SELECT * FROM COMPANY
                 WHERE (COMPANY.DISTRIBUTOR_ID = (SELECT DIS_REPORT_USER.DISTRIBUTOR_ID from DIS_REPORT_USER WHERE DIS_REPORT_USER.USER_ID = ${userId}) or COMPANY.EVENT like (SELECT DISTRIBUTOR.NAME FROM DISTRIBUTOR WHERE DISTRIBUTOR.ID = (SELECT DIS_REPORT_USER.DISTRIBUTOR_ID from DIS_REPORT_USER WHERE DIS_REPORT_USER.USER_ID =${userId}))) and COMPANY.COMPANY_NAME like '%${companyName}%'
-                `;  
+                `;
     let request = new sql.Request();
-    request.query(sqlCode,(err,result)=>{
-        if(err){
+    request.query(sqlCode, (err, result) => {
+        if (err) {
             console.log(err);
-        }else{
+        } else {
             res.json(result.recordset);
         }
+    });
+});
+
+server.get("/getCompanyName", (req, res) => {
+    let companyId = req.query.companyId;
+    let request = new sql.Request();
+    request.query(`SELECT COMPANY_NAME FROM COMPANY WHERE COMPANY_ID = ${companyId}`, (err, result) => {
+        res.send(result.recordset[0]['COMPANY_NAME']);
+    });
+
+});
+
+server.get('/getStatusList', (req, res) => {
+    let request = new sql.Request();
+    request.query(`SELECT * FROM SALE_STATUS`, (err, result) => {
+        if (err) {
+            console.log(err);
+            return;
+        }
+        res.json(result.recordset);
+    });
+});
+
+server.get('/getEmployeeName', (req, res) => {
+    let request = new sql.Request();
+    request.query(`SELECT SHORT_NAME FROM DIS_REPORT_USER`, (err, result) => {
+        res.json(result.recordset);
     });
 });
 
@@ -67,48 +94,34 @@ server.post("/updateCompanyProspect", (req, res) => {
     let expectedRev = req.body.expectedRev;
 
     let userName;
-    let companyName;
 
     let request = new sql.Request();
-    
-        request.query(`select * from DIS_REPORT_USER where DIS_REPORT_USER.USER_ID like '${userId}'`,(err,result)=>{
-            if(err){
-             console.log(err);
-             return;
+
+    request.query(`select * from DIS_REPORT_USER where DIS_REPORT_USER.USER_ID like '${userId}'`, (err, result) => {
+        if (err) {
+            console.log(err);
+            return;
+        }
+        userName = result.recordset[0]['SHORT_NAME'];
+        request.query(`SELECT * FROM DIS_REPORT_COMPANY_MAPPING WHERE COMPANY_ID = ${companyId}`, (err, result2) => {
+            if (err) {
+                console.log(err);
+                return;
             }
-                userName = result.recordset[0]['SHORT_NAME'];
-                request.query(`select * from COMPANY where COMPANY.COMPANY_ID = ${companyId}`,(err,result1)=>{
-                    if(err){
-                        console.log(err);
-                        return;
-                    }
-                    companyName = result1.recordset[0]['COMPANY_NAME'];
-                    console.log(userName);
-                    console.log(companyName);
-                    console.log(dealPercent);
-                    console.log(expectedRev);
-                    console.log(dateFormat(new Date(), 'yyyy-mm-dd hh:MM:ss'));
-
-                    request.query(`select * from SALE_HISTORY_BY_COMPANY where SALE_NAME like '${userName}' and COMPANY_NAME like '${companyName}'`,(err, result2)=>{
-                        if(result2.recordset.length>0){
-                            console.log('1');
-                            request.query(`UPDATE SALE_HISTORY_BY_COMPANY
-                                SET EXPECTED_REVENUE = ${dealPercent}, CLOSE_DEAL_PERCENTAGE = ${expectedRev}
-                                WHERE (SALE_NAME like '${userName}') and (COMPANY_NAME like '${companyName}') and (ACTIVITY_DATE = (SELECT TOP 1 ACTIVITY_DATE FROM SALE_HISTORY_BY_COMPANY where (SALE_NAME like '${userName}') and (COMPANY_NAME like '${companyName}') ORDER BY ACTIVITY_DATE DESC));
-                                `,(err, result3)=>{
-                                res.send('1');
-                            });
-                        }else{
-                            console.log('2');
-                            request.query(`INSERT INTO SALE_HISTORY_BY_COMPANY(SALE_NAME, COMPANY_NAME, ACTIVITY_DATE,EXPECTED_REVENUE,CLOSE_DEAL_PERCENTAGE,CREATE_DATE,CREATE_BY)
-                                VALUES('${userName}','${companyName}','${dateFormat(new Date(), 'yyyy-mm-dd hh:MM:ss')}', ${expectedRev},${dealPercent},'${dateFormat(new Date(), 'yyyy-mm-dd hh:MM:ss')}','${userName}');`,(err, result4)=>{
-                                res.send('1');
-                            });
-                        }
-                    });
-
+            if (result2.recordset.length == 0) {
+                request.query(`INSERT INTO DIS_REPORT_COMPANY_MAPPING(COMPANY_ID, EXPECTED_REVENUE, CLOSE_DEAL_PERCENTAGE,UPDATE_SALE_STATUS_BY)
+                            VALUES(${companyId},'${expectedRev}','${dealPercent}','${userName}')`, (err, result3) => {
+                    res.send('1');
                 });
-        
+            } else {
+                request.query(`UPDATE DIS_REPORT_COMPANY_MAPPING
+                            SET EXPECTED_REVENUE='${expectedRev}',CLOSE_DEAL_PERCENTAGE='${dealPercent}',UPDATE_SALE_STATUS_BY = '${userName}'
+                            WHERE COMPANY_ID = ${companyId};`, (err, result3) => {
+                    res.send('1');
+                });
+            }
+        });
+
     });
 });
 
@@ -117,7 +130,45 @@ server.post("/updateCompanyInfo", (req, res) => {
 });
 
 server.post("/updateCompanyProgress", (req, res) => {
+    let datetime = req.body.datetime;
+    let status = req.body.status;
+    let note = req.body.note;
+    let sale_name = req.body.sale_name;
+    let created_by = req.body.created_by;
+    let companyName = req.body.companyName;
+    let userName;
+    let request = new sql.Request();
 
+    request.query(`SELECT SHORT_NAME FROM DIS_REPORT_USER WHERE USER_ID = ${created_by}`, (req, result) => {
+        userName = result.recordset[0]['SHORT_NAME'];
+
+        request.query(`SELECT TOP 1 CONVERT(varchar,CREATE_DATE,20) as CREATE_DATE FROM SALE_HISTORY_BY_COMPANY
+                    WHERE COMPANY_NAME like '${companyName}'
+                    ORDER BY CREATE_DATE`, (err, result1) => {
+            if (result1.recordset.length == 0) {
+                request.query(`INSERT INTO SALE_HISTORY_BY_COMPANY
+                         VALUES('${sale_name}','${companyName}','${datetime}','${status}','${note}','${dateFormat(new Date(),"yyyy-mm-dd HH:MM:00")}','${userName}')`, (err, result2) => {
+                    if (err) {
+                        console.log(err);
+                        return;
+                    }
+                });
+            } else {
+                let create_date = result1.recordset[0]['CREATE_DATE'];
+                console.log(create_date);
+                console.log(`INSERT INTO SALE_HISTORY_BY_COMPANY
+                VALUES('${sale_name}','${companyName}','${datetime}','${status}','${note}','${create_date}','${userName}')`);
+                request.query(`INSERT INTO SALE_HISTORY_BY_COMPANY
+                         VALUES('${sale_name}','${companyName}','${datetime}','${status}','${note}','${create_date}','${userName}')`, (err, result2) => {
+                    if (err) {
+                        console.log(err);
+                        return;
+                    }
+                });
+            }
+        });
+    });
+    res.send('1');
 });
 
 server.listen(8750, (req, res) => {

@@ -21,9 +21,9 @@ class _company_page extends State<company_page> {
   TextEditingController _companyName = TextEditingController();
   List<dynamic> companyData;
 
-  String hostIP = "localhost";
+  String hostIP = "10.0.2.2";
   String port = '8750';
-
+  
   Future searchCompanyRequest() async {
     List<dynamic> tmp_data = List<dynamic>();
     var res = await http.get('http://${hostIP}:${port}/getCompanyList?userId=${userId}&companyName=${_companyName.text}');
@@ -174,7 +174,7 @@ class _company_page extends State<company_page> {
                                                         builder: (context) {
                                                   return progress_page(
                                                       companyData[index]
-                                                          ['COMPANY_ID']);
+                                                          ['COMPANY_ID'].toString(),userId);
                                                 }));
                                               },
                                               child: Container(
