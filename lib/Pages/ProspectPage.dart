@@ -14,7 +14,7 @@ class _prospect_page extends State<prospect_page> {
   String userId;
   _prospect_page(this.companyId, this.userId);
 
-  String hostIP = "localhost";
+  String hostIP = "10.0.2.2";
   String port = '8750';
   String companyName;
 
@@ -25,8 +25,9 @@ class _prospect_page extends State<prospect_page> {
   TextEditingController _moneyText = TextEditingController();
   TextEditingController _prosText = TextEditingController();
 
-  Future getCompanyName()async{
-    var res = await http.get('http://${hostIP}:${port}/getCompanyName?companyId=${companyId}');
+  Future getCompanyName() async {
+    var res = await http
+        .get('http://${hostIP}:${port}/getCompanyName?companyId=${companyId}');
     setState(() {
       companyName = res.body;
     });
@@ -70,6 +71,47 @@ class _prospect_page extends State<prospect_page> {
       }
       money += _moneyText.text[i];
     }
+
+    if (money.isEmpty) {
+      Navigator.of(context).pop();
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              content: Text("กรุณาใส่ยอดขาย"),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text("ตกลง"),
+                  onPressed: (){
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          });
+      return false;
+    }
+
+    if (_prosText.text.isEmpty) {
+      Navigator.of(context).pop();
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              content: Text("กรุณาใส่ความเป็นไปได้"),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text("ตกลง"),
+                  onPressed: (){
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          });
+      return false;
+    }
+
     var res = await http
         .post('http://${hostIP}:${port}/updateCompanyProspect', body: {
       'userId': this.userId,
@@ -202,7 +244,6 @@ class _prospect_page extends State<prospect_page> {
                                 Expanded(
                                   child: Container(
                                     child: TextField(
-                                      
                                       controller: _moneyText,
                                       keyboardType: TextInputType.number,
                                       decoration: InputDecoration.collapsed(

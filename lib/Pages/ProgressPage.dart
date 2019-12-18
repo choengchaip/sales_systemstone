@@ -28,7 +28,7 @@ class _progress_page extends State<progress_page> {
   List<dynamic> employees = ["กำลังโหลด"];
   String companyName;
 
-  String hostIP = "localhost";
+  String hostIP = "10.0.2.2";
   String port = '8750';
 
   TextEditingController _noteText = TextEditingController();
@@ -51,7 +51,6 @@ class _progress_page extends State<progress_page> {
     for (int i = 0; i < employeeJson.length; i++) {
       tmp_employees.add(employeeJson[i]['SHORT_NAME']);
     }
-    print(tmp_employees);
     setState(() {
       employee = tmp_employees[0];
       employees = tmp_employees;
@@ -75,6 +74,47 @@ class _progress_page extends State<progress_page> {
             child: CircularProgressIndicator(),
           );
         });
+
+    if (dateTime == null) {
+      Navigator.of(context).pop();
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              content: Text("กรุณาใส่วันที่"),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text("ตกลง"),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          });
+      return;
+    }
+    
+    if (status == null) {
+      Navigator.of(context).pop();
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              content: Text("กรุณาใส่สถานะ"),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text("ตกลง"),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          });
+      return;
+    }
+
     var res = await http
         .post('http://${hostIP}:${port}/updateCompanyProgress', body: {
       'datetime': dateTime,
@@ -398,11 +438,6 @@ class _progress_page extends State<progress_page> {
             ),
             GestureDetector(
               onTap: () {
-                print(dateTime);
-                print(status_id);
-                print(_noteText.text);
-                print(employee);
-                print(userId);
                 updateCompanyProgress();
               },
               child: Container(

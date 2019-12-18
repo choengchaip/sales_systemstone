@@ -52,10 +52,10 @@ server.get("/getCompanyList", (req, res) => {
     });
 });
 
-server.get("/getCountryList",(req,res)=>{
+server.get("/getCountryList", (req, res) => {
     let request = new sql.Request();
-    request.query("SELECT COUNTRY_ID, COUNTRY_NAME FROM COUNTRY_MASTER",(err, result)=>{
-        if(err){
+    request.query("SELECT COUNTRY_ID, COUNTRY_NAME FROM COUNTRY_MASTER", (err, result) => {
+        if (err) {
             console.log(err);
             return;
         }
@@ -94,10 +94,10 @@ server.get("/getCompanyInfo", (req, res) => {
     let companyId = req.query.companyId;
     let request = new sql.Request();
     request.query(`select COMPANY.COMPANY_ID, COMPANY.COMPANY_NAME,COMPANY.TEL_NO,COMPANY.CONTACT_POINT,COMPANY.ADDRESS,COUNTRY_MASTER.COUNTRY_ID,COUNTRY_MASTER.COUNTRY_NAME, PROVINCE_MASTER.PROVINCE_ID,PROVINCE_MASTER.PROVINCE_NAME,DISTRICT_MASTER.DISTRICT_ID,DISTRICT_MASTER.DISTRICT_NAME from COMPANY
-                JOIN COUNTRY_MASTER on COUNTRY_MASTER.COUNTRY_ID = COMPANY.COUNTRY_ID
-                JOIN PROVINCE_MASTER on PROVINCE_MASTER.PROVINCE_ID = COMPANY.PROVINCE_ID
-                JOIN DISTRICT_MASTER on DISTRICT_MASTER.DISTRICT_ID = COMPANY.DISTRICT_ID 
-                where COMPANY_ID = ${companyId}`,(err, result)=>{
+                LEFT JOIN COUNTRY_MASTER on COUNTRY_MASTER.COUNTRY_ID = COMPANY.COUNTRY_ID
+                LEFT JOIN PROVINCE_MASTER on PROVINCE_MASTER.PROVINCE_ID = COMPANY.PROVINCE_ID
+                LEFT JOIN DISTRICT_MASTER on DISTRICT_MASTER.DISTRICT_ID = COMPANY.DISTRICT_ID 
+                where COMPANY_ID = ${companyId}`, (err, result) => {
         res.json(result.recordset);
     });
 });
@@ -105,8 +105,8 @@ server.get("/getCompanyInfo", (req, res) => {
 server.get("/getProvinceList", (req, res) => {
     let countryId = req.query.countryId;
     let request = new sql.Request();
-    request.query(`SELECT PROVINCE_ID, PROVINCE_NAME FROM PROVINCE_MASTER WHERE COUNTRY_ID = ${countryId}`,(err, result)=>{
-        if(err){
+    request.query(`SELECT PROVINCE_ID, PROVINCE_NAME FROM PROVINCE_MASTER WHERE COUNTRY_ID = ${countryId}`, (err, result) => {
+        if (err) {
             console.log(err);
             return;
         }
@@ -117,8 +117,8 @@ server.get("/getProvinceList", (req, res) => {
 server.get("/getDistrictList", (req, res) => {
     let provinceId = req.query.provinceId;
     let request = new sql.Request();
-    request.query(`SELECT DISTRICT_ID, DISTRICT_NAME FROM DISTRICT_MASTER WHERE PROVINCE_ID = ${provinceId}`,(err, result)=>{
-        if(err){
+    request.query(`SELECT DISTRICT_ID, DISTRICT_NAME FROM DISTRICT_MASTER WHERE PROVINCE_ID = ${provinceId}`, (err, result) => {
+        if (err) {
             console.log(err);
             return;
         }
@@ -173,7 +173,8 @@ server.post("/updateCompanyInfo", (req, res) => {
     let provinceId = req.body.provinceId;
     let districtId = req.body.districtId;
     let userId = req.body.userId;
-
+    let companyId = req.body.companyId;
+    let userName;
     let request = new sql.Request();
 
     request.query(`select * from DIS_REPORT_USER where DIS_REPORT_USER.USER_ID like '${userId}'`, (err, result) => {
@@ -182,9 +183,12 @@ server.post("/updateCompanyInfo", (req, res) => {
             return;
         }
         userName = result.recordset[0]['SHORT_NAME'];
-    }
-
-    res.send('ok');
+        request.query(`UPDATE COMPANY
+            SET CONTACT_POINT = '${contact_point}', TEL_NO = '${tel}', ADDRESS = '${address}', COUNTRY_ID = ${countryId},PROVINCE_ID = ${provinceId}, DISTRICT_ID = ${districtId}, UPDATE_SALE_STATUS_BY = '${userName}'
+            WHERE COMPANY_ID = ${companyId}`,(err,result2)=>{
+            res.send('1');
+        });
+    })
 });
 
 server.post("/updateCompanyProgress", (req, res) => {
@@ -227,6 +231,14 @@ server.post("/updateCompanyProgress", (req, res) => {
         });
     });
     res.send('1');
+});
+
+server.get("/getUserInfo",(req,res)=>{
+    let userId = req.query.userId;
+    let request = new sql.Request();
+    request.query(`SELECT SHORT_NAME FROM DIS_REPORT_USER WHERE USER_ID = ${userId}`,(err, result)=>{
+        res.send(result.recordset[0]['SHORT_NAME']);
+    });
 });
 
 server.listen(8750, (req, res) => {

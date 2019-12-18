@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart' as prefix0;
 import 'package:flutter/services.dart';
-import 'Pages/CompanyPage.dart';
 import 'package:http/http.dart' as http;
+
+import 'Pages/MainPage.dart';
 
 class login_page extends StatefulWidget {
   @override
   _login_page createState() => _login_page();
 }
 
-String hostIP = "localhost";
+String hostIP = "10.0.2.2";
 String port = '8750';
 
 class _login_page extends State<login_page> {
@@ -107,7 +107,7 @@ class _login_page extends State<login_page> {
                 if (status) {
                   Navigator.pushReplacement(context,
                       MaterialPageRoute(builder: (context) {
-                    return company_page(userId);
+                    return main_page(userId);
                   }));
                 }else{
                   showDialog(

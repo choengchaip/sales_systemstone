@@ -9,15 +9,15 @@ import 'package:http/http.dart' as http;
 class info_page extends StatefulWidget {
   String companyId;
   String userId;
-  info_page(this.companyId,this.userId);
+  info_page(this.companyId, this.userId);
   @override
-  _info_page createState() => _info_page(this.companyId,this.userId);
+  _info_page createState() => _info_page(this.companyId, this.userId);
 }
 
 class _info_page extends State<info_page> {
   String companyId;
   String userId;
-  _info_page(this.companyId,this.userId);
+  _info_page(this.companyId, this.userId);
 
   TextStyle topStyle = TextStyle(color: Colors.white, fontSize: 20);
   TextStyle companyStyle = TextStyle(fontSize: 18, fontWeight: FontWeight.bold);
@@ -34,7 +34,7 @@ class _info_page extends State<info_page> {
   String districtId;
   String companyName;
 
-  String hostIP = "localhost";
+  String hostIP = "10.0.2.2";
   String port = "8750";
   var companyInfo;
 
@@ -76,11 +76,29 @@ class _info_page extends State<info_page> {
         district = companyInfo['company_district'];
         districtId = companyInfo['company_districtId'].toString();
       });
-    }else{
+    } else {
       _contactText.clear();
       _telText.clear();
       _addressText.clear();
     }
+  }
+
+  cancelAlert(String key) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            content: Text(key),
+            actions: <Widget>[
+              FlatButton(
+                child: Text("ตกลง"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        });
   }
 
   Future updateCompanyInfo() async {
@@ -92,6 +110,37 @@ class _info_page extends State<info_page> {
             child: CircularProgressIndicator(),
           );
         });
+    if (_contactText.text.isEmpty) {
+      Navigator.of(context).pop();
+      await cancelAlert("กรุณาใส่ชื่อผู้ติดต่อ");
+      return;
+    }
+    if (_telText.text.isEmpty) {
+      Navigator.of(context).pop();
+      await cancelAlert("กรุณาใส่เบอร์โทรศัพท์");
+      return;
+    }
+    if (_addressText.text.isEmpty) {
+      Navigator.of(context).pop();
+      await cancelAlert("กรุณาใส่ที่อยู่");
+      return;
+    }
+    if (countryId == 'null') {
+      Navigator.of(context).pop();
+      await cancelAlert("กรุณาเลือกประเทศ");
+      return;
+    }
+    if (provinceId == 'null') {
+      Navigator.of(context).pop();
+      await cancelAlert("กรุณาเลือกจังหวัด");
+      return;
+    }
+    if (districtId == 'null') {
+      Navigator.of(context).pop();
+      await cancelAlert("กรุณาเลือกอำเภอ");
+      return;
+    }
+
     var res =
         await http.post('http://${hostIP}:${port}/updateCompanyInfo', body: {
       'contact_point': _contactText.text,
@@ -100,7 +149,8 @@ class _info_page extends State<info_page> {
       'countryId': countryId,
       'provinceId': provinceId,
       'districtId': districtId,
-      'userId': userId
+      'userId': userId,
+      'companyId': companyId
     });
     Navigator.of(context).pop();
     var tmp = await showDialog(
