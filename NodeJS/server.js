@@ -52,6 +52,17 @@ server.get("/getCompanyList", (req, res) => {
     });
 });
 
+server.get("/getCountryList",(req,res)=>{
+    let request = new sql.Request();
+    request.query("SELECT COUNTRY_ID, COUNTRY_NAME FROM COUNTRY_MASTER",(err, result)=>{
+        if(err){
+            console.log(err);
+            return;
+        }
+        res.json(result.recordset);
+    });
+});
+
 server.get("/getCompanyName", (req, res) => {
     let companyId = req.query.companyId;
     let request = new sql.Request();
@@ -80,12 +91,41 @@ server.get('/getEmployeeName', (req, res) => {
 });
 
 server.get("/getCompanyInfo", (req, res) => {
-
+    let companyId = req.query.companyId;
+    let request = new sql.Request();
+    request.query(`select COMPANY.COMPANY_ID, COMPANY.COMPANY_NAME,COMPANY.TEL_NO,COMPANY.CONTACT_POINT,COMPANY.ADDRESS,COUNTRY_MASTER.COUNTRY_ID,COUNTRY_MASTER.COUNTRY_NAME, PROVINCE_MASTER.PROVINCE_ID,PROVINCE_MASTER.PROVINCE_NAME,DISTRICT_MASTER.DISTRICT_ID,DISTRICT_MASTER.DISTRICT_NAME from COMPANY
+                JOIN COUNTRY_MASTER on COUNTRY_MASTER.COUNTRY_ID = COMPANY.COUNTRY_ID
+                JOIN PROVINCE_MASTER on PROVINCE_MASTER.PROVINCE_ID = COMPANY.PROVINCE_ID
+                JOIN DISTRICT_MASTER on DISTRICT_MASTER.DISTRICT_ID = COMPANY.DISTRICT_ID 
+                where COMPANY_ID = ${companyId}`,(err, result)=>{
+        res.json(result.recordset);
+    });
 });
 
-server.get("/getCompanyProgress", (req, res) => {
-
+server.get("/getProvinceList", (req, res) => {
+    let countryId = req.query.countryId;
+    let request = new sql.Request();
+    request.query(`SELECT PROVINCE_ID, PROVINCE_NAME FROM PROVINCE_MASTER WHERE COUNTRY_ID = ${countryId}`,(err, result)=>{
+        if(err){
+            console.log(err);
+            return;
+        }
+        res.json(result.recordset);
+    });
 });
+
+server.get("/getDistrictList", (req, res) => {
+    let provinceId = req.query.provinceId;
+    let request = new sql.Request();
+    request.query(`SELECT DISTRICT_ID, DISTRICT_NAME FROM DISTRICT_MASTER WHERE PROVINCE_ID = ${provinceId}`,(err, result)=>{
+        if(err){
+            console.log(err);
+            return;
+        }
+        res.json(result.recordset);
+    });
+});
+
 
 server.post("/updateCompanyProspect", (req, res) => {
     let userId = req.body.userId;
@@ -126,7 +166,25 @@ server.post("/updateCompanyProspect", (req, res) => {
 });
 
 server.post("/updateCompanyInfo", (req, res) => {
+    let contact_point = req.body.contact_point;
+    let tel = req.body.tel;
+    let address = req.body.address;
+    let countryId = req.body.countryId;
+    let provinceId = req.body.provinceId;
+    let districtId = req.body.districtId;
+    let userId = req.body.userId;
 
+    let request = new sql.Request();
+
+    request.query(`select * from DIS_REPORT_USER where DIS_REPORT_USER.USER_ID like '${userId}'`, (err, result) => {
+        if (err) {
+            console.log(err);
+            return;
+        }
+        userName = result.recordset[0]['SHORT_NAME'];
+    }
+
+    res.send('ok');
 });
 
 server.post("/updateCompanyProgress", (req, res) => {

@@ -1,30 +1,132 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'Components/CountryPage.dart';
 import 'Components/ProvincePage.dart';
 import 'Components/DistrictPage.dart';
+import 'package:http/http.dart' as http;
 
 class info_page extends StatefulWidget {
-  int companyName;
-  info_page(this.companyName);
+  String companyId;
+  String userId;
+  info_page(this.companyId,this.userId);
   @override
-  _info_page createState() => _info_page(this.companyName);
+  _info_page createState() => _info_page(this.companyId,this.userId);
 }
 
 class _info_page extends State<info_page> {
-  int companyName;
-  _info_page(this.companyName);
+  String companyId;
+  String userId;
+  _info_page(this.companyId,this.userId);
 
   TextStyle topStyle = TextStyle(color: Colors.white, fontSize: 20);
   TextStyle companyStyle = TextStyle(fontSize: 18, fontWeight: FontWeight.bold);
   TextStyle headerDetial = TextStyle(fontSize: 18);
 
-  TextEditingController _contactText = TextEditingController();
-  TextEditingController _telText = TextEditingController();
-  TextEditingController _addressText = TextEditingController();
+  TextEditingController _contactText = TextEditingController(text: "กำลังโหลด");
+  TextEditingController _telText = TextEditingController(text: "กำลังโหลด");
+  TextEditingController _addressText = TextEditingController(text: "กำลังโหลด");
   String country;
+  String countryId;
   String province;
+  String provinceId;
   String district;
-  
+  String districtId;
+  String companyName;
+
+  String hostIP = "localhost";
+  String port = "8750";
+  var companyInfo;
+
+  Future getCompanyName() async {
+    var res = await http
+        .get('http://${hostIP}:${port}/getCompanyName?companyId=${companyId}');
+    setState(() {
+      companyName = res.body;
+    });
+    getCompanyInfo();
+  }
+
+  Future getCompanyInfo() async {
+    var tmp_companyInfo = {};
+    var tmp;
+    var res = await http
+        .get('http://${hostIP}:${port}/getCompanyInfo?companyId=${companyId}');
+    tmp = jsonDecode(res.body);
+    if (tmp.length > 0) {
+      tmp_companyInfo['company_name'] = tmp[0]['COMPANY_NAME'];
+      tmp_companyInfo['company_tel'] = tmp[0]['TEL_NO'];
+      tmp_companyInfo['company_address'] = tmp[0]['ADDRESS'];
+      tmp_companyInfo['company_country'] = tmp[0]['COUNTRY_NAME'];
+      tmp_companyInfo['company_countryId'] = tmp[0]['COUNTRY_ID'];
+      tmp_companyInfo['company_province'] = tmp[0]['PROVINCE_NAME'];
+      tmp_companyInfo['company_provinceId'] = tmp[0]['PROVINCE_ID'];
+      tmp_companyInfo['company_district'] = tmp[0]['DISTRICT_NAME'];
+      tmp_companyInfo['company_districtId'] = tmp[0]['DISTRICT_ID'];
+      tmp_companyInfo['company_contact'] = tmp[0]['CONTACT_POINT'];
+      setState(() {
+        companyInfo = tmp_companyInfo;
+        _contactText.text = companyInfo['company_contact'];
+        _telText.text = companyInfo['company_tel'];
+        _addressText.text = companyInfo['company_address'];
+        country = companyInfo['company_country'];
+        countryId = companyInfo['company_countryId'].toString();
+        province = companyInfo['company_province'];
+        provinceId = companyInfo['company_provinceId'].toString();
+        district = companyInfo['company_district'];
+        districtId = companyInfo['company_districtId'].toString();
+      });
+    }else{
+      _contactText.clear();
+      _telText.clear();
+      _addressText.clear();
+    }
+  }
+
+  Future updateCompanyInfo() async {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return Container(
+            alignment: Alignment.center,
+            child: CircularProgressIndicator(),
+          );
+        });
+    var res =
+        await http.post('http://${hostIP}:${port}/updateCompanyInfo', body: {
+      'contact_point': _contactText.text,
+      'tel': _telText.text,
+      'address': _addressText.text,
+      'countryId': countryId,
+      'provinceId': provinceId,
+      'districtId': districtId,
+      'userId': userId
+    });
+    Navigator.of(context).pop();
+    var tmp = await showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            content: Text("บันทึกสำเร็จ"),
+            actions: <Widget>[
+              FlatButton(
+                child: Text("ตกลง"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        });
+    Navigator.of(context).pop();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getCompanyName();
+  }
+
   @override
   Widget build(BuildContext context) {
     double _paddingTop = MediaQuery.of(context).padding.top;
@@ -85,7 +187,7 @@ class _info_page extends State<info_page> {
                           Container(
                             padding: EdgeInsets.only(left: 10),
                             child: Text(
-                              this.companyName.toString(),
+                              companyName == null ? "กำลังโหลด" : companyName,
                               style: companyStyle,
                             ),
                           ),
@@ -224,12 +326,20 @@ class _info_page extends State<info_page> {
                           ),
                           GestureDetector(
                             onTap: () async {
-                              String tmp_country = await Navigator.push(context,
+                              var tmp_country = await Navigator.push(context,
                                   MaterialPageRoute(builder: (context) {
                                 return country_page();
                               }));
                               setState(() {
-                                country = tmp_country;
+                                if (tmp_country != null) {
+                                  province = null;
+                                  provinceId = null;
+                                  district = null;
+                                  districtId = null;
+                                  country = tmp_country['country_name'];
+                                  countryId =
+                                      tmp_country['country_id'].toString();
+                                }
                               });
                             },
                             child: Container(
@@ -278,13 +388,17 @@ class _info_page extends State<info_page> {
                           ),
                           GestureDetector(
                             onTap: () async {
-                              String tmp_province =
-                                  await Navigator.push(context,
-                                      MaterialPageRoute(builder: (context) {
-                                return province_page();
+                              var tmp_province = await Navigator.push(context,
+                                  MaterialPageRoute(builder: (context) {
+                                return province_page(countryId);
                               }));
                               setState(() {
-                                province = tmp_province;
+                                if (tmp_province != null) {
+                                  provinceId = tmp_province['province_id'];
+                                  province = tmp_province['province_name'];
+                                  district = null;
+                                  districtId = null;
+                                }
                               });
                             },
                             child: Container(
@@ -333,13 +447,15 @@ class _info_page extends State<info_page> {
                           ),
                           GestureDetector(
                             onTap: () async {
-                              String tmp_district =
-                                  await Navigator.push(context,
-                                      MaterialPageRoute(builder: (context) {
-                                return district_page();
+                              var tmp_district = await Navigator.push(context,
+                                  MaterialPageRoute(builder: (context) {
+                                return district_page(provinceId);
                               }));
                               setState(() {
-                                district = tmp_district;
+                                if (tmp_district != null) {
+                                  districtId = tmp_district['district_id'];
+                                  district = tmp_district['district_name'];
+                                }
                               });
                             },
                             child: Container(
@@ -380,7 +496,7 @@ class _info_page extends State<info_page> {
             ),
             GestureDetector(
               onTap: () {
-                Navigator.of(context).pop();
+                updateCompanyInfo();
               },
               child: Container(
                 alignment: Alignment.center,

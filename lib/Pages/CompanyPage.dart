@@ -151,9 +151,7 @@ class _company_page extends State<company_page> {
                                                 Navigator.push(context,
                                                     MaterialPageRoute(
                                                         builder: (context) {
-                                                  return info_page(
-                                                      companyData[index]
-                                                          ['COMPANY_ID']);
+                                                  return info_page(companyData[index]['COMPANY_ID'].toString(),userId);
                                                 }));
                                               },
                                               child: Container(
