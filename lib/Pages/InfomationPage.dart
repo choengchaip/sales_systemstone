@@ -34,7 +34,7 @@ class _info_page extends State<info_page> {
   String districtId;
   String companyName;
 
-  String hostIP = "localhost";
+  String hostIP = "192.168.1.12";
   String port = "8750";
   var companyInfo;
 

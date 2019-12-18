@@ -22,7 +22,7 @@ class _main_page extends State<main_page> {
   TextEditingController _companyName = TextEditingController();
   List<dynamic> companyData;
 
-  String hostIP = "localhost";
+  String hostIP = "192.168.1.12";
   String port = '8750';
 
   int currentPage = 0;

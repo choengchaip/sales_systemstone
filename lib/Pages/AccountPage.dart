@@ -19,7 +19,7 @@ class _account_page extends State<account_page> {
   TextStyle headerDetial = TextStyle(fontSize: 18);
   String userName;
 
-  String hostIP = "localhost";
+  String hostIP = "192.168.1.12";
   String port = "8750";
 
   Future getUserInfo() async {

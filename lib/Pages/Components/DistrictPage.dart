@@ -16,7 +16,7 @@ class  _district_page extends State<district_page> {
   TextStyle companyStyle = TextStyle(fontSize: 18, fontWeight: FontWeight.bold);
   TextStyle headerDetial = TextStyle(fontSize: 18);
 
-  String hostIP = "localhost";
+  String hostIP = "192.168.1.12";
   String port = "8750";
 
   var districtData;

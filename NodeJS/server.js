@@ -132,9 +132,9 @@ server.post("/updateCompanyProspect", (req, res) => {
     let companyId = req.body.companyId;
     let dealPercent = req.body.dealPercent;
     let expectedRev = req.body.expectedRev;
-
     let userName;
-
+    console.log('UpdateCompanyProspect');
+    console.log(req.body);
     let request = new sql.Request();
 
     request.query(`select * from DIS_REPORT_USER where DIS_REPORT_USER.USER_ID like '${userId}'`, (err, result) => {
@@ -175,6 +175,8 @@ server.post("/updateCompanyInfo", (req, res) => {
     let userId = req.body.userId;
     let companyId = req.body.companyId;
     let userName;
+    console.log('UpdateCompanyInfo');
+    console.log(req.body);
     let request = new sql.Request();
 
     request.query(`select * from DIS_REPORT_USER where DIS_REPORT_USER.USER_ID like '${userId}'`, (err, result) => {
@@ -199,6 +201,8 @@ server.post("/updateCompanyProgress", (req, res) => {
     let created_by = req.body.created_by;
     let companyName = req.body.companyName;
     let userName;
+    console.log('UpdateCompanyProgress');
+    console.log(req.body);
     let request = new sql.Request();
 
     request.query(`SELECT SHORT_NAME FROM DIS_REPORT_USER WHERE USER_ID = ${created_by}`, (req, result) => {
@@ -217,9 +221,6 @@ server.post("/updateCompanyProgress", (req, res) => {
                 });
             } else {
                 let create_date = result1.recordset[0]['CREATE_DATE'];
-                console.log(create_date);
-                console.log(`INSERT INTO SALE_HISTORY_BY_COMPANY
-                VALUES('${sale_name}','${companyName}','${datetime}','${status}','${note}','${create_date}','${userName}')`);
                 request.query(`INSERT INTO SALE_HISTORY_BY_COMPANY
                          VALUES('${sale_name}','${companyName}','${datetime}','${status}','${note}','${create_date}','${userName}')`, (err, result2) => {
                     if (err) {
