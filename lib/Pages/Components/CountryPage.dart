@@ -13,7 +13,7 @@ class _country_page extends State<country_page> {
   TextStyle companyStyle = TextStyle(fontSize: 18, fontWeight: FontWeight.bold);
   TextStyle headerDetial = TextStyle(fontSize: 18);
 
-  String hostIP = "10.0.2.2";
+  String hostIP = "localhost";
   String port = "8750";
 
   var countryData;

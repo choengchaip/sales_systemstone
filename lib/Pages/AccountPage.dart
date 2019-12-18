@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+
 class account_page extends StatefulWidget {
   String userId;
   account_page(this.userId);
@@ -18,11 +19,12 @@ class _account_page extends State<account_page> {
   TextStyle headerDetial = TextStyle(fontSize: 18);
   String userName;
 
-  String hostIP = "10.0.2.2";
+  String hostIP = "localhost";
   String port = "8750";
 
-  Future getUserInfo()async{
-    var res = await http.get('http://${hostIP}:${port}/getUserInfo?userId=${this.userId}');
+  Future getUserInfo() async {
+    var res = await http
+        .get('http://${hostIP}:${port}/getUserInfo?userId=${this.userId}');
     setState(() {
       userName = res.body;
     });
@@ -59,26 +61,26 @@ class _account_page extends State<account_page> {
               child: Column(
                 children: <Widget>[
                   Container(
-                      padding: EdgeInsets.only(left: 10),
-                      margin: EdgeInsets.only(top: 10, bottom: 10),
-                      child: Row(
-                        children: <Widget>[
-                          Container(
-                            child: Text(
-                              "ชื่อผู้ใช้",
-                              style: headerDetial,
-                            ),
+                    padding: EdgeInsets.only(left: 10),
+                    margin: EdgeInsets.only(top: 10, bottom: 10),
+                    child: Row(
+                      children: <Widget>[
+                        Container(
+                          child: Text(
+                            "ชื่อผู้ใช้",
+                            style: headerDetial,
                           ),
-                          Container(
-                            padding: EdgeInsets.only(left: 10),
-                            child: Text(
-                              userName == null ? "กำลังโหลด": userName,
-                              style: companyStyle,
-                            ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.only(left: 10),
+                          child: Text(
+                            userName == null ? "กำลังโหลด" : userName,
+                            style: companyStyle,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
+                  ),
                 ],
               ),
             ),
@@ -86,27 +88,32 @@ class _account_page extends State<account_page> {
           GestureDetector(
             onTap: () {
               showDialog(
-                context: context,
-                builder: (context){
-                  return AlertDialog(
-                    content: Text("ต้องการออกจากระบบหรือไม่ ?"),
-                    actions: <Widget>[
-                      FlatButton(
-                        child: Text("ยกเลิก"),
-                        onPressed: ()=>Navigator.of(context).pop(),
-                      ),
-                      FlatButton(
-                        child: Text("ตกลง"),
-                        onPressed: ()=>Navigator.of(context).popUntil((a) => a.isFirst),
-                      )
-                    ],
-                  );
-                }
-              );
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      content: Text("ต้องการออกจากระบบหรือไม่ ?"),
+                      actions: <Widget>[
+                        FlatButton(
+                          child: Text("ยกเลิก"),
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                        FlatButton(
+                          child: Text("ตกลง"),
+                          onPressed: () =>
+                              Navigator.of(context).popUntil((a) => a.isFirst),
+                        )
+                      ],
+                    );
+                  });
             },
             child: Container(
+              margin: EdgeInsets.only(left: 15,right: 15,bottom: 15),
               height: 60,
-              decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.all(Radius.circular(8)),
+                boxShadow: [BoxShadow(color: Colors.grey,blurRadius: 1.5)]
+              ),
               alignment: Alignment.center,
               child: Text("ออกจากระบบ", style: logoutStyle),
             ),
