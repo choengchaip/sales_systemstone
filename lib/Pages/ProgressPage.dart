@@ -28,7 +28,7 @@ class _progress_page extends State<progress_page> {
   List<dynamic> employees = ["กำลังโหลด"];
   String companyName;
 
-  String hostIP = "10.0.2.2";
+  String hostIP = "localhost";
   String port = '8750';
 
   TextEditingController _noteText = TextEditingController();

@@ -14,7 +14,7 @@ class _prospect_page extends State<prospect_page> {
   String userId;
   _prospect_page(this.companyId, this.userId);
 
-  String hostIP = "10.0.2.2";
+  String hostIP = "localhost";
   String port = '8750';
   String companyName;
 

@@ -21,7 +21,7 @@ class _company_page extends State<company_page> {
   TextEditingController _companyName = TextEditingController();
   List<dynamic> companyData;
 
-  String hostIP = "10.0.2.2";
+  String hostIP = "localhost";
   String port = '8750';
   
   Future searchCompanyRequest() async {
