@@ -1,57 +1,66 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
-
 import 'Pages/MainPage.dart';
+import 'Config.dart';
 
 class login_page extends StatefulWidget {
   @override
   _login_page createState() => _login_page();
 }
 
-String hostIP = "192.168.1.12";
-String port = '8750';
-
 class _login_page extends State<login_page> {
   TextStyle loginStyle = TextStyle(fontSize: 18, color: Colors.white);
-
+  Config config = new Config();
   TextEditingController _usernameText = TextEditingController();
   TextEditingController _passwordText = TextEditingController();
 
   String userId;
 
-  Future<bool> sendLoginRequest() async {
-
-    showDialog(
-      context: context,
-      builder: (context){
-        return Container(
-          height: 200,
-          width: 300,
-          alignment: Alignment.center,
-          child: CircularProgressIndicator(),
-        );
-      }
-    );
-
-    var req = await http.post('http://${hostIP}:${port}/auth', body: {
-      'username': _usernameText.text.toString(),
-      'password': _passwordText.text.toString()
-    });
-    String res = req.body;
-    print(res);
-    if (res == '0') {
-      return false;
-    } else {
-      setState(() {
-        userId = res;
-      });
-      return true;
-    }
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    print(config.getIP());
+    print(config.getPort());
   }
 
   @override
   Widget build(BuildContext context) {
+    // String hostIP = config.getIP();
+    // String port = config.getPort();
+
+    String hostIP = "";
+    String port = "";
+
+    Future<bool> sendLoginRequest() async {
+      showDialog(
+          context: context,
+          builder: (context) {
+            return Container(
+              height: 200,
+              width: 300,
+              alignment: Alignment.center,
+              child: CircularProgressIndicator(),
+            );
+          });
+
+      var req = await http.post('http://${hostIP}:${port}/auth', body: {
+        'username': _usernameText.text.toString(),
+        'password': _passwordText.text.toString()
+      });
+      String res = req.body;
+      print(res);
+      if (res == '0') {
+        return false;
+      } else {
+        setState(() {
+          userId = res;
+        });
+        return true;
+      }
+    }
+
     return Scaffold(
       body: Container(
         alignment: Alignment.center,
@@ -109,18 +118,23 @@ class _login_page extends State<login_page> {
                       MaterialPageRoute(builder: (context) {
                     return main_page(userId);
                   }));
-                }else{
+                } else {
                   showDialog(
-                    context: context,
-                    builder: (context){
-                      return AlertDialog(
-                        title: Text("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง"),
-                        actions: <Widget>[
-                          FlatButton(child: Text("ตกลง"),onPressed: (){Navigator.of(context).pop();Navigator.of(context).pop();},)
-                        ],
-                      );
-                    }
-                  );
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: Text("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง"),
+                          actions: <Widget>[
+                            FlatButton(
+                              child: Text("ตกลง"),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                Navigator.of(context).pop();
+                              },
+                            )
+                          ],
+                        );
+                      });
                 }
               },
               child: Container(
