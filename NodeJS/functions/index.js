@@ -13,16 +13,25 @@ var config = {
     }
 };
 
-exports.e1 = functions.region('asia-east2').https.onRequest((req, res) => {
-    sql.connect(config, err=>{
-        new sql.Request().query(`SELECT * FROM DIS_REPORT_USER`,(err,result)=>{
+exports.e1 = functions.region('asia-east2').https.onRequest(async(req, res) => {
+    // await sql.connect(config)
+    // const result = await sql.query(`SELECT * FROM DIS_REPORT_USER`);
+    // res.send(result);
+    // console.log(result);
+    await sql.connect(config, (err) => {
+        if (err) {
+            console.log(err);
+        } else {
+            console.log("Database Connected");
+        }
+        let request = new sql.Request();
+        request.query('SELECT * FROM DIS_REPORT_USER',(err,result)=>{
             if(err){
                 res.send(err);
-                console.log(err);
             }else{
                 res.send(result);
             }
-        });
-    })
+        })
+    });
 });
 
